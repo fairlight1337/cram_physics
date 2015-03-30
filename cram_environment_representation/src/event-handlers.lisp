@@ -169,12 +169,11 @@
   (declare (type object object)
            (type string frame))
   (tf:copy-pose-stamped
-   (cl-tf2:ensure-pose-stamped-transformed
+   (cl-tf2:do-transform
     *tf2* (tf:pose->pose-stamped
            designators-ros:*fixed-frame* 0.0
            (btr:pose object))
-    frame
-    :use-current-ros-time t)
+    frame)
    :stamp 0.0))
 
 (defun extend-designator-properties (designator property-extension)

@@ -39,7 +39,7 @@
 (defun set-robot-state-from-tf (tf robot &key (reference-frame "/map") timestamp)
   (let* ((root-link (cl-urdf:name (cl-urdf:root-link (urdf robot))))
          (robot-transform
-           (cl-tf2:ensure-transform-available *tf2* root-link reference-frame)))
+           (cl-tf2:lookup-transform tf root-link reference-frame timestamp 0)))
     (when robot-transform
       (setf (link-pose robot root-link)
             (cl-transforms:transform->pose robot-transform))
@@ -49,7 +49,7 @@
                 (cl-transforms:transform->pose
                  (cl-transforms:transform*
                   robot-transform
-                  (cl-tf2:ensure-transform-available *tf2* tf-name root-link)))))))))
+                  (cl-tf2:lookup-transform tf tf-name root-link timestamp 0)))))))))
 
 (defgeneric set-robot-state-from-joints (joint-states robot)
   (:method ((joint-states sensor_msgs-msg:jointstate) (robot robot-object))
@@ -291,8 +291,7 @@ time for that :(..."
                           fixed-frame robot-base-frame time
                           (cl-transforms:pose->transform (pose robot))))
     (let* ((ik-base-frame "torso_lift_link")
-           (pose (cl-tf2:ensure-pose-stamped-transformed
-                  *tf2* pose-stamped ik-base-frame :use-current-ros-time t)))
+           (pose (cl-tf2:do-transform *tf2* pose-stamped ik-base-frame)))
       (roslisp:with-fields ((solution (joint_state solution))
                             (error-code (val error_code)))
           (roslisp:call-persistent-service
