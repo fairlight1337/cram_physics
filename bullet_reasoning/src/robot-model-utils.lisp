@@ -218,10 +218,11 @@ joint positions as seeds."
                      (cl-transforms:reference-transform pose)
                      (cl-transforms:transform-inv
                       (cl-transforms:reference-transform tool)))))
-    (tf:make-pose-stamped
-     (tf:frame-id pose) (tf:stamp pose)
-     (cl-transforms:translation goal-trans)
-     (cl-transforms:rotation goal-trans))))
+    (cl-transforms-plugin:make-pose-stamped
+     (cl-tf:make-pose
+      (cl-transforms:translation goal-trans)
+      (cl-transforms:rotation goal-trans))
+     (tf:frame-id pose) (tf:stamp pose))))
 
 ;; (defun get-ik-solver-info (group-name)
 ;;   (or (cdr (assoc group-name *ik-solver-info-cache* :test #'equal))

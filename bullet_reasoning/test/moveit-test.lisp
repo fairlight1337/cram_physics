@@ -14,11 +14,11 @@
   (let* ((request (roslisp:make-message
                    "moveit_msgs/PositionIKRequest"
                    :pose_stamped (tf:pose-stamped->msg
-                                  (tf:make-pose-stamped
-                                   "torso_lift_link"
-                                   (roslisp:ros-time)
-                                   (cl-transforms:make-3d-vector 0.45 0.2 0.31)
-                                   (cl-transforms:make-identity-rotation)))
+                                  (cl-transforms-plugin:make-pose-stamped
+                                   (cl-tf:make-pose
+                                    (cl-transforms:make-3d-vector 0.45 0.2 0.31)
+                                    (cl-transforms:make-identity-rotation))
+                                   "torso_lift_link" (roslisp:ros-time)))
                    :group_name "right_arm"
                    :timeout 1.0))
          (result (compute-ik-client request)))

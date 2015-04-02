@@ -29,10 +29,11 @@
 (in-package :projection-process-modules)
 
 (defparameter *both-arms-carry-pose*
-  (tf:make-pose-stamped
-   "torso_lift_link" 0.0
-   (cl-transforms:make-3d-vector 0.5 0.0 -0.1)
-   (cl-transforms:make-quaternion 0 0 0 1)))
+  (cl-transforms-plugin:make-pose-stamped
+   (cl-tf:make-pose
+    (cl-transforms:make-3d-vector 0.5 0.0 -0.1)
+    (cl-transforms:make-quaternion 0 0 0 1))
+   "torso_lift_link" 0.0))
 
 (defun set-robot-reach-pose (side pose &key tool-frame seed-state)
   (or

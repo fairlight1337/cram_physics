@@ -30,10 +30,11 @@
 
 
 (defparameter *right-parking-end-effector-pose*
-  (tf:make-pose-stamped
-   "torso_lift_link" 0.0
-   (cl-transforms:make-3d-vector 0.3 -0.3 -0.23)
-   (cl-transforms:euler->quaternion :ay (/ pi 2))))
+  (cl-transforms-plugin:make-pose-stamped
+   (cl-tf:make-pose
+    (cl-transforms:make-3d-vector 0.3 -0.3 -0.23)
+    (cl-transforms:euler->quaternion :ay (/ pi 2)))
+   "torso_lift_link" 0.0))
 
 (defparameter *right-parking-joint-states*
   '(("r_shoulder_pan_joint" -1.3810115229719555d0)
@@ -45,10 +46,11 @@
     ("r_wrist_roll_joint" -2.5861844605475843d0)))
 
 (defparameter *left-parking-end-effector-pose*
-  (tf:make-pose-stamped
-   "torso_lift_link" 0.0
-   (cl-transforms:make-3d-vector 0.3 0.3 -0.23)
-   (cl-transforms:euler->quaternion :ay (/ pi 2))))
+  (cl-transforms-plugin:make-pose-stamped
+   (cl-tf:make-pose
+    (cl-transforms:make-3d-vector 0.3 0.3 -0.23)
+    (cl-transforms:euler->quaternion :ay (/ pi 2)))
+   "torso_lift_link" 0.0))
 
 (defparameter *left-parking-joint-states*
   '(("l_shoulder_pan_joint" 1.3810115229719555d0)
