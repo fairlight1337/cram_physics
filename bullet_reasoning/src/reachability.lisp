@@ -150,8 +150,8 @@ tool length."
     (get-ik
      robot (etypecase pose
              (tf:pose-stamped pose)
-             (cl-transforms:pose (cl-transforms-plugin:pose->pose-stamped
-                                  "map" 0.0 pose)))
+             (cl-transforms:pose (cl-transforms-plugin:make-pose-stamped
+                                  pose "map" 0.0)))
      :group-name (side->ik-group-name side)
      :tool-frame (or tool-frame
                      (calculate-tool

@@ -157,17 +157,17 @@
     (assert object)
     (desig:make-designator
      'desig-props:location
-     `((pose ,(cl-transforms-plugin:pose->pose-stamped
-               designators-ros:*fixed-frame* (cut:current-timestamp)
-               (bt:pose object)))))))
+     `((pose ,(cl-transforms-plugin:make-pose-stamped
+               (bt:pose object)
+               designators-ros:*fixed-frame* (cut:current-timestamp)))))))
 
 (defun make-object-location-in-gripper (object gripper-link)
   "Returns a new location designator that indicates a location in the
   robot's gripper."
   (declare (type object object))
-  (let* ((object-pose (cl-transforms-plugin:pose->pose-stamped
-                       designators-ros:*fixed-frame* 0.0
-                       (btr:pose object)))
+  (let* ((object-pose (cl-transforms-plugin:make-pose-stamped
+                       (btr:pose object)
+                       designators-ros:*fixed-frame* 0.0))
          (robot (get-robot-object)))
     (assert (member gripper-link (btr:object-attached robot object) :test #'equal))
     (let ((supporting-bounding-box (get-supporting-object-bounding-box (name object))))
@@ -189,9 +189,9 @@
            (type string frame))
   (cl-transforms-plugin:copy-ext-pose-stamped
    (cl-tf2:do-transform
-    *tf2* (cl-transforms-plugin:pose->pose-stamped
-           designators-ros:*fixed-frame* 0.0
-           (btr:pose object))
+    *tf2* (cl-transforms-plugin:make-pose-stamped
+           (btr:pose object)
+           designators-ros:*fixed-frame* 0.0)
     frame)
    :stamp 0.0))
 
