@@ -222,7 +222,7 @@ joint positions as seeds."
      (cl-tf:make-pose
       (cl-transforms:translation goal-trans)
       (cl-transforms:rotation goal-trans))
-     (tf:frame-id pose) (tf:stamp pose))))
+     (cl-tf2:get-frame-id pose) (cl-tf2:get-time-stamp pose))))
 
 ;; (defun get-ik-solver-info (group-name)
 ;;   (or (cdr (assoc group-name *ik-solver-info-cache* :test #'equal))
