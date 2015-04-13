@@ -167,7 +167,7 @@
              (cut:lazy-car
               (bullet-reasoning:get-ik
                robot-object
-               (tf:copy-pose-stamped
+               (cl-transforms-plugin:copy-ext-pose-stamped
                 ?parking-pose :orientation (get-link-orientation-in-robot link))
                :group-name (side->ik-group-name side)
                :seed-state (make-joint-state-message ?joint-states)))))

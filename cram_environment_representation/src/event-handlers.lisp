@@ -157,7 +157,7 @@
     (assert object)
     (desig:make-designator
      'desig-props:location
-     `((pose ,(tf:pose->pose-stamped
+     `((pose ,(cl-transforms-plugin:pose->pose-stamped
                designators-ros:*fixed-frame* (cut:current-timestamp)
                (bt:pose object)))))))
 
@@ -165,7 +165,7 @@
   "Returns a new location designator that indicates a location in the
   robot's gripper."
   (declare (type object object))
-  (let* ((object-pose (tf:pose->pose-stamped
+  (let* ((object-pose (cl-transforms-plugin:pose->pose-stamped
                        designators-ros:*fixed-frame* 0.0
                        (btr:pose object)))
          (robot (get-robot-object)))
@@ -187,9 +187,9 @@
 (defun object-pose-in-frame (object frame)
   (declare (type object object)
            (type string frame))
-  (tf:copy-pose-stamped
+  (cl-transforms-plugin:copy-ext-pose-stamped
    (cl-tf2:do-transform
-    *tf2* (tf:pose->pose-stamped
+    *tf2* (cl-transforms-plugin:pose->pose-stamped
            designators-ros:*fixed-frame* 0.0
            (btr:pose object))
     frame)
