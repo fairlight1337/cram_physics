@@ -31,7 +31,7 @@
 
 (defparameter *right-parking-end-effector-pose*
   (cl-transforms-plugin:make-pose-stamped
-   (cl-tf:make-pose
+   (cl-transforms:make-pose
     (cl-transforms:make-3d-vector 0.3 -0.3 -0.23)
     (cl-transforms:euler->quaternion :ay (/ pi 2)))
    "torso_lift_link" 0.0))
@@ -47,7 +47,7 @@
 
 (defparameter *left-parking-end-effector-pose*
   (cl-transforms-plugin:make-pose-stamped
-   (cl-tf:make-pose
+   (cl-transforms:make-pose
     (cl-transforms:make-3d-vector 0.3 0.3 -0.23)
     (cl-transforms:euler->quaternion :ay (/ pi 2)))
    "torso_lift_link" 0.0))

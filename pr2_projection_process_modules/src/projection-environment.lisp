@@ -36,7 +36,7 @@
 
 (define-projection-environment pr2-bullet-projection-environment
   :special-variable-initializers
-  ((cram-roslisp-common:*tf* (make-instance 'tf:transformer))
+  ((cram-roslisp-common:*tf* (make-instance 'tf:transformer)) ;; TODO(winkler): Is this still working with cl-tf2?
    ;; (*current-bullet-world* (bt:copy-world *current-bullet-world*))
    (*current-timeline* (btr:timeline-init *current-bullet-world*))
    (desig:*default-role* 'projection-role)
