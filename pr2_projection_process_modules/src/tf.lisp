@@ -40,17 +40,19 @@
     (assert (not (cut:is-var ?robot-instance)))
     (tf:set-transform
      *tf*
-     (tf:make-stamped-transform
+     (cl-transforms-plugin:make-transform-stamped
       odom-frame base-frame (roslisp:ros-time)
-      (cl-transforms:origin ?robot-pose)
-      (cl-transforms:orientation ?robot-pose))
+      (cl-transforms:make-transform
+       (cl-transforms:origin ?robot-pose)
+       (cl-transforms:orientation ?robot-pose)))
      :suppress-callbacks t)
     (tf:set-transform
      *tf*
-     (tf:make-stamped-transform
+     (cl-transforms-plugin:make-transform-stamped
       map-frame odom-frame (roslisp:ros-time)
-      (cl-transforms:make-identity-vector)
-      (cl-transforms:make-identity-rotation))
+      (cl-transforms:make-transform
+       (cl-transforms:make-identity-vector)
+       (cl-transforms:make-identity-rotation)))
      :suppress-callbacks t)
     (bullet-reasoning:set-tf-from-robot-state *tf* ?robot-instance)))
 

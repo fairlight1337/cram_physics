@@ -35,12 +35,12 @@
 (defmethod on-input ((process-module projection-ptu) (input desig:action-designator))
   (let* ((designator-solution (desig:reference input))
          (pose (etypecase designator-solution
-                 (tf:pose-stamped designator-solution)
+                 (cl-transforms-plugin:pose-stamped designator-solution)
                  (desig:location-designator (desig:reference designator-solution)))))
     (execute-as-action
      input
      (lambda ()
-       (let ((pose (tf:transform-pose *tf* :pose pose :target-frame "map")))
+       (let ((pose (cl-tf2:do-transform cram-roslisp-common:*tf2* pose "map")))
          (assert
           (crs:prolog `(and
                         (bullet-world ?world)

@@ -30,7 +30,7 @@
 
 (defparameter *both-arms-carry-pose*
   (cl-transforms-plugin:make-pose-stamped
-   (cl-tf:make-pose
+   (cl-transforms:make-pose
     (cl-transforms:make-3d-vector 0.5 0.0 -0.1)
     (cl-transforms:make-quaternion 0 0 0 1))
    "torso_lift_link" 0.0))
@@ -61,8 +61,8 @@
 
 (defun get-link-orientation-in-robot (link-name &key (base-link "base_footprint"))
   (cl-transforms:rotation
-   (tf:lookup-transform
-    cram-roslisp-common:*tf* :source-frame link-name :target-frame base-link)))
+   (cl-tf2:lookup-transform
+    cram-roslisp-common:*tf2* base-link link-name (roslisp:ros-time) 0.0)))
 
 (defun execute-action-trajectory-points (action-designator &optional object-name)
   (cut:force-ll
@@ -123,22 +123,25 @@
                      (robot-arms-parking-joint-states
                       ?right-parking-joint-states :right))))
     (let* ((left-gripper-transform
-             (tf:lookup-transform
-              cram-roslisp-common:*tf*
-              :source-frame ?left-end-effector :target-frame "base_footprint"))
+             (cl-tf2:lookup-transform
+              cram-roslisp-common:*tf2*
+              "base_footprint" ?left-end-effector
+              (roslisp:ros-time) 0.0))
            (right-gripper-transform
-             (tf:lookup-transform
-              cram-roslisp-common:*tf*
-              :source-frame ?right-end-effector :target-frame "base_footprint"))
+             (cl-tf2:lookup-transform
+              cram-roslisp-common:*tf2*
+              "base_footprint" ?right-end-effector
+              (roslisp:ros-time) 0.0))
            (left->right-arm-vector
              (cl-transforms:v-
               (cl-transforms:translation left-gripper-transform)
               (cl-transforms:translation right-gripper-transform)))
            (arm-distance (cl-transforms:v-norm left->right-arm-vector))
            (carry-pose-in-base
-             (tf:transform-pose
-              cram-roslisp-common:*tf*
-              :target-frame "base_footprint" :pose *both-arms-carry-pose*)))
+             (cl-tf2:do-transform
+              cram-roslisp-common:*tf2*
+               *both-arms-carry-pose*
+               "base_footprint")))
       (set-robot-reach-pose
        :left carry-pose-in-base
        :tool-frame (cl-transforms:make-pose

@@ -219,7 +219,7 @@ joint positions as seeds."
                      (cl-transforms:transform-inv
                       (cl-transforms:reference-transform tool)))))
     (cl-transforms-plugin:make-pose-stamped
-     (cl-tf:make-pose
+     (cl-transforms:make-pose
       (cl-transforms:translation goal-trans)
       (cl-transforms:rotation goal-trans))
      (cl-tf2:get-frame-id pose) (cl-tf2:get-time-stamp pose))))
@@ -288,7 +288,7 @@ time for that :(..."
                              :time time)
     ;; tell the tf transformer where the robot currently is in the global
     ;; fixed coordinate system
-    (tf:set-transform tf (tf:transform->stamped-transform
+    (tf:set-transform tf (cl-transforms-plugin:make-transform-stamped
                           fixed-frame robot-base-frame time
                           (cl-transforms:pose->transform (pose robot))))
     (let* ((ik-base-frame "torso_lift_link")
@@ -304,7 +304,7 @@ time for that :(..."
             ;; of the chain which is what we want for ik_link_name.
             ;; :ik_link_name (elt link-names 0)  <- moveit per default takes
             ;;                                      the last link in the chain
-            :pose_stamped (tf:pose-stamped->msg
+            :pose_stamped (cl-transforms-plugin:pose-stamped->msg
                            (calculate-tool-pose pose :tool tool-frame))
             ;; something is wrong with the seed state atm, so this will stay
             ;; disabled for now
