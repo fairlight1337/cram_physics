@@ -39,7 +39,9 @@
 (defun set-robot-state-from-tf (tf robot &key (reference-frame "/map") timestamp)
   (let* ((root-link (cl-urdf:name (cl-urdf:root-link (urdf robot))))
          (robot-transform
-           (cl-tf2:lookup-transform tf root-link reference-frame timestamp 0)))
+           (cl-transforms-plugin:transform
+            (cl-transforms-plugin:msg->transform-stamped
+             (cl-tf2:lookup-transform tf reference-frame root-link timestamp 3.0)))))
     (when robot-transform
       (setf (link-pose robot root-link)
             (cl-transforms:transform->pose robot-transform))
@@ -49,7 +51,9 @@
                 (cl-transforms:transform->pose
                  (cl-transforms:transform*
                   robot-transform
-                  (cl-tf2:lookup-transform tf tf-name root-link timestamp 0)))))))))
+                  (cl-transforms-plugin:transform
+                   (cl-transforms-plugin:msg->transform-stamped
+                    (cl-tf2:lookup-transform tf root-link tf-name timestamp 3.0)))))))))))
 
 (defgeneric set-robot-state-from-joints (joint-states robot)
   (:method ((joint-states sensor_msgs-msg:jointstate) (robot robot-object))
