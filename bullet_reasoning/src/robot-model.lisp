@@ -328,8 +328,9 @@ of the object should _not_ be updated."
                             (cl-transforms:transform-inv body-transform))))
           (dolist (attachment attachments)
             (let ((attached-object (object (world robot-object) attachment)))
-              (setf (pose attached-object)
-                    (cl-transforms:transform-pose pose-delta (pose attached-object))))))))))
+              (when attached-object
+                (setf (pose attached-object)
+                      (cl-transforms:transform-pose pose-delta (pose attached-object)))))))))))
 
 (defun update-link-poses (robot-object link pose)
   "Updates the pose of `link' and all its children according to
