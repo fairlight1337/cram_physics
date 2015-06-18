@@ -29,12 +29,77 @@
 
 (defvar *ignored-perception-bullet-objects* nil)
 
+(defclass perceived-object-data
+    (desig:object-designator-data
+     cram-manipulation-knowledge:object-shape-data-mixin)
+  ((pose :reader pose :initarg :pose)
+   (identifier :reader identifier :initarg :identifier)))
+
 (defun ignore-perception-bullet-object (object-name)
   (setf *ignored-perception-bullet-objects*
         (remove object-name *ignored-perception-bullet-objects*))
   (push object-name *ignored-perception-bullet-objects*))
 
-(defmethod cram-task-knowledge:objects-perceived (object-designators)
+(defun remove-disappeared-objects (object-names)
+  "Removes objects from the current bullet world. They are refered to by the `name' property specified in their designator."
+  (dolist (object-name object-names)
+    (crs:prolog
+     `(and (btr:bullet-world ?w)
+           (btr:retract
+            (btr:object
+             ?w ,object-name))))
+    (plan-knowledge:on-event
+     (make-instance 'plan-knowledge:object-removed-event
+                    :object-name object-name))))
+
+(defun add-appeared-objects (objects)
+  "Adds objects to the current bullet world. In the world, they then consist of boxes of dimensions as specified in the `dimensions'
+property in their designator."
+  (dolist (object objects)
+    (let ((pose (desig:desig-prop-value
+                 (desig:desig-prop-value object 'at)
+                 'pose))
+          (dimensions (or (desig:desig-prop-value
+                           object 'desig-props:dimensions)
+                          (vector 0.1 0.1 0.1)))
+          (name (desig:desig-prop-value object 'desig-props:name)))
+      ;; TODO(winkler): Fix me
+      (crs:prolog `(and (bullet-world ?w)
+                        (assert
+                         (object
+                          ?w box ,name ,pose
+                          :mass 0.1
+                          :size ,(map 'list #'identity dimensions)))))
+      ;; (crs:prolog
+      ;;  `(and (bullet-world ?w)
+      ;;        (assert
+      ;;         (object
+      ;;          ?w btr::mesh ,name ,pose
+      ;;          :mass 0.1
+      ;;          :mesh desig-props::mondamin :color (0.8 0.4 0.2)))))
+      (plan-knowledge:on-event
+       (make-instance 'plan-knowledge:object-perceived-event
+                      :object-designator object
+                      :perception-source 'generic)))))
+
+(defun update-objects (objects)
+  "Updates objects' poses in the current bullet world based on the
+`name', and the `pose' properties in their respective designator."
+  (dolist (object objects)
+    (let ((pose (desig:desig-prop-value
+                 (desig:desig-prop-value object 'at)
+                 'pose))
+          (name (desig:desig-prop-value object 'desig-props:name)))
+      (crs:prolog
+       `(and (bullet-world ?w)
+             (assert
+              (object-pose
+               ?w ,name ,pose)))))
+    (plan-knowledge:on-event
+     (make-instance 'plan-knowledge:object-updated-event
+                    :object-designator object))))
+
+(defmethod cram-task-knowledge:objects-perceived (object-template object-designators)
   ;; Make sure that the current pose and everything is in the
   ;; bullet reasoning beliefstate.
   (plan-knowledge:on-event
@@ -43,22 +108,23 @@
          (perceived-object-designators ;; Doesn't include semantic handles
            (cpl:mapcar-clean
             (lambda (perceived-object)
-              (unless (eql (desig-prop-value perceived-object 'type)
+              (unless (eql (desig:desig-prop-value perceived-object 'type)
                            'desig-props::semantic-handle)
-                (unless (crs:prolog `(perceived-object-invalid
+                (unless (crs:prolog `(cram-task-knowledge:perceived-object-invalid
                                       ,perceived-object))
                   perceived-object)))
             perceived-objects))
          (perceived-semantic-handles ;; Only includes semantic handles
            (cpl:mapcar-clean
             (lambda (perceived-object)
-              (when (eql (desig-prop-value perceived-object 'type)
+              (when (eql (desig:desig-prop-value perceived-object 'type)
                          'desig-props::semantic-handle)
                 perceived-object))
             perceived-objects))
          (perceived-object-names
            (mapcar (lambda (perceived-object-designator)
-                     (desig-prop-value perceived-object-designator 'name))
+                     (desig:desig-prop-value perceived-object-designator
+                                             'desig-props::name))
                    perceived-object-designators))
   ;; Represents *all* objects present in the current bullet
   ;; world, except for the ones explicitly being ignored.
@@ -69,9 +135,9 @@
               (cut:with-vars-bound (?o) bdgs
                 ?o))
             (crs:prolog
-             `(and (btr:bullet-world ?w)
-                   (btr:object ?w ?o)
-                   (not (btr:robot ?o))
+             `(and (bullet-world ?w)
+                   (object ?w ?o)
+                   (not (robot ?o))
                    (not (member ?o ,*ignored-perception-bullet-objects*)))))))
         ;; Identify all objects that are not present at all in the
         ;; bullet world, but are identified as being seen by the
@@ -85,8 +151,15 @@
     (labels ((object-name->object (object-name)
                (find object-name perceived-object-designators
                      :test (lambda (name object)
-                             (eql name (desig:desig-prop-value
-                                        object 'name)))))
+                             (string=
+                              (or (when (symbolp name) (write-to-string name))
+                                  name)
+                              (or (when (symbolp (desig:desig-prop-value
+                                                  object 'desig-props::name))
+                                    (write-to-string (desig:desig-prop-value
+                                                      object 'desig-props::name)))
+                                  (desig:desig-prop-value
+                                   object 'desig-props::name))))))
              (object-names->objects (object-names)
                (mapcar #'object-name->object object-names)))
       ;; Add objects that were not present in the currently visible
@@ -102,10 +175,10 @@
                  (lambda (bdgs)
                    (cut:with-vars-bound (?o) bdgs
                      ?o))
-                 (crs:prolog `(and (btr:bullet-world ?w)
-                                   (btr:robot ?r)
+                 (crs:prolog `(and (bullet-world ?w)
+                                   (robot ?r)
                                    (member ?o ,all-bullet-objects)
-                                   (btr:visible ?w ?r ?o))))))
+                                   (visible ?w ?r ?o))))))
              ;; Identify all objects that should be visible from the
              ;; bullet world, and are reported as being seen by the
              ;; perception system.
@@ -136,142 +209,29 @@
           ;; Filter perceived objects based on the description of the
           ;; request (template) designator.
           (append
-           (filter-perceived-objects
-            object-designator perceived-semantic-handles)
-           (filter-perceived-objects
-            object-designator
+           (cram-task-knowledge:filter-objects
+            object-template perceived-semantic-handles)
+           (cram-task-knowledge:filter-objects
+            object-template
             ;; Examine visible objects (new or updated) closer.
             (mapcar (lambda (examined-object-designator)
                       (let ((data (make-instance
                                    'perceived-object-data
-                                   :identifier (desig-prop-value
-                                                examined-object-designator 'name)
-                                   :object-identifier (desig-prop-value
-                                                       examined-object-designator 'name)
-                                   :pose (desig-prop-value
-                                          (desig-prop-value
+                                   :identifier (desig:desig-prop-value
+                                                examined-object-designator
+                                                'desig-props::name)
+                                   :object-identifier (desig:desig-prop-value
+                                                       examined-object-designator
+                                                       'desig-props::name)
+                                   :pose (desig:desig-prop-value
+                                          (desig:desig-prop-value
                                            examined-object-designator 'desig-props::at)
                                           'desig-props::pose))))
-                        (make-effective-designator
-                         object-designator
-                         :new-properties (description examined-object-designator)
+                        (desig:make-effective-designator
+                         object-template
+                         :new-properties (desig:description examined-object-designator)
                          :data-object data)))
                     (mapcar (lambda (perceived-object-designator)
-                              (examine-perceived-object-designator
-                               object-designator perceived-object-designator))
+                              (cram-task-knowledge:examine-perceived-object-designator
+                               object-template perceived-object-designator))
                             perceived-object-designators)))))))))
-
-(defmethod examine-perceived-object-designator
-    ((original-designator desig:object-designator)
-     (object-designator desig:object-designator))
-  "Enriches a perceived object designator `object-designator' with
-additional information from the reasoning system. First, the type is
-infered (if not set already either manually in the requesting
-designator, or the one returned from the perception system), and then
-additional properties are infered and appended to the designator's
-description."
-  (let* ((object-description (desig:description
-                              object-designator))
-         (type (or (desig:desig-prop-value object-designator
-                                           'desig-props:type)
-                   (cut:with-vars-bound (?type)
-                       (first
-                        (crs:prolog `(infer-object-property
-                                      ,object-designator
-                                      desig-props:type ?type)))
-                     (unless (eql ?type '?type)
-                       ?type))
-                   (desig:desig-prop-value original-designator
-                                           'desig-props:type)))
-         (typed-object-designator
-           (or (and (or (eql type '?type) (not type)) object-designator)
-               (desig:make-designator
-                'object
-                (append
-                 (remove-if (lambda (x) (eql (car x) 'type))
-                            object-description)
-                 `((type ,type)))
-                object-designator)))
-         (new-properties
-           (cut:force-ll (cut:lazy-mapcar
-                          (lambda (bdgs)
-                            (cut:with-vars-bound (?key ?value) bdgs
-                              `(,?key ,?value)))
-                          (crs:prolog `(infer-object-property
-                                        ,typed-object-designator
-                                        ?key ?value)))))
-         (refined-old
-           (remove-if (lambda (x)
-                        (find x new-properties
-                              :test (lambda (x y)
-                                      (eql (car x) (car y)))))
-                      (desig:description
-                       typed-object-designator))))
-    (let* ((infered-description (append refined-old new-properties))
-           (complete-description
-             (let ((original-description
-                     (desig:description original-designator)))
-               (append infered-description
-                       (cpl:mapcar-clean
-                        (lambda (original-property)
-                          (unless (find original-property
-                                        infered-description
-                                        :test (lambda (x y)
-                                                (eql (car x) (car y))))))
-                        original-description)))))
-      (desig:make-designator
-       'object complete-description object-designator))))
-
-(defun remove-disappeared-objects (object-names)
-  "Removes objects from the current bullet world. They are refered to by the `name' property specified in their designator."
-  (dolist (object-name object-names)
-    (crs:prolog
-     `(and (btr:bullet-world ?w)
-           (btr:retract
-            (btr:object
-             ?w ,object-name))))
-    (make-instance 'plan-knowledge:object-removed-event
-                   :object-name object-name)))
-
-(defun add-appeared-objects (objects)
-  "Adds objects to the current bullet world. In the world, they then consist of boxes of dimensions as specified in the `dimensions'
-property in their designator."
-  (dolist (object objects)
-    (let ((pose (desig:desig-prop-value
-                 (desig:desig-prop-value object 'at)
-                 'pose))
-          (dimensions (desig:desig-prop-value object 'dimensions))
-          (name (desig:desig-prop-value object 'name)))
-      ;; TODO(winkler): Fix me
-      ;; (crs:prolog `(and (btr:bullet-world ?w)
-      ;;                   (btr:assert
-      ;;                    (btr:object
-      ;;                     ?w btr:box ,name ,pose
-      ;;                     :mass 0.1
-      ;;                     :size ,(map 'list #'identity dimensions)))))
-      (crs:prolog
-       `(and (bullet-world ?w)
-             (assert
-              (object
-               ?w btr::mesh ,name ,pose
-               :mass 0.1
-               :mesh desig-props::mondamin :color (0.8 0.4 0.2))))))
-    (make-instance 'plan-knowledge:object-perceived-event
-                   :object-designator object
-                   :perception-source 'generic)))
-
-(defun update-objects (objects)
-  "Updates objects' poses in the current bullet world based on the
-`name', and the `pose' properties in their respective designator."
-  (dolist (object objects)
-    (let ((pose (desig:desig-prop-value
-                 (desig:desig-prop-value object 'at)
-                 'pose))
-          (name (desig:desig-prop-value object 'name)))
-      (crs:prolog
-       `(and (bullet-world ?w)
-             (assert
-              (object-pose
-               ?w ,name ,pose)))))
-    (make-instance 'plan-knowledge:object-updated-event
-                   :object-designator object)))
