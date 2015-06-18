@@ -112,7 +112,7 @@
             (setf (gethash (name object) (slot-value world 'objects))
                   object))
           (add-rigid-body world body))
-        (setf (gethash (name body) (slot-value object 'rigid-bodies))
+        (setf (gethash (cl-bullet:name body) (slot-value object 'rigid-bodies))
               body)))))
 
 (defun make-object (world name &optional
@@ -129,7 +129,8 @@
   (when rigid-bodies
     (initialize-rigid-bodies object rigid-bodies :add add)
     (unless pose-reference-body
-      (setf (slot-value object 'pose-reference-body) (name (car rigid-bodies))))))
+      (setf (slot-value object 'pose-reference-body)
+            (cl-bullet:name (car rigid-bodies))))))
 
 (defmethod invalidate-object :after ((obj object))
   (with-slots (rigid-bodies) obj
@@ -204,7 +205,7 @@
                                      :width 16 :height 16
                                      :texture (texture-str->bitmap
                                                *static-plane-texture*
-                                               #\Space)))))))
+                                               #\Space))))))))
 
 (defmethod add-object ((world bt-world) (type (eql 'sphere)) name pose
                        &key mass radius color)
