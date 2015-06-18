@@ -98,4 +98,4 @@
            ignore-perception-bullet-object)
   (:import-from cram-roslisp-common *tf2*)
   (:desig-properties mug mondamin plate pot handle cutlery knife fork spatula
-                     pancake pancake-maker))
+                     pancake pancake-maker at name pose dimensions))
