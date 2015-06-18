@@ -35,6 +35,10 @@
   (push object-name *ignored-perception-bullet-objects*))
 
 (defmethod cram-task-knowledge:objects-perceived (object-designators)
+  ;; Make sure that the current pose and everything is in the
+  ;; bullet reasoning beliefstate.
+  (plan-knowledge:on-event
+   (make-instance 'plan-knowledge:robot-state-changed))
   (let* ((perceived-objects object-designators)
          (perceived-object-designators ;; Doesn't include semantic handles
            (cpl:mapcar-clean
