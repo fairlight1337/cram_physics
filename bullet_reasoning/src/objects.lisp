@@ -142,15 +142,15 @@
   the slot `pose-reference-body'"
   (let ((body (rigid-body object (slot-value object 'pose-reference-body))))
     (when body
-      (pose body))))
+      (cl-bullet:pose body))))
 
 (defmethod (setf pose) (new-value (object object))
   (let ((body (rigid-body object (slot-value object 'pose-reference-body))))
     (when body
-      (setf (pose body) new-value))))
+      (setf (cl-bullet:pose body) new-value))))
 
 (defun set-object-pose (object new-pose)
-  (setf (pose object) (ensure-pose new-pose)))
+  (setf (cl-bullet:pose object) (ensure-pose new-pose)))
 
 (defmethod draw ((context gl-context) (object object))
   (dolist (body (rigid-bodies object))
@@ -205,7 +205,7 @@
                                      :width 16 :height 16
                                      :texture (texture-str->bitmap
                                                *static-plane-texture*
-                                               #\Space))))))))
+                                               #\Space)))))))
 
 (defmethod add-object ((world bt-world) (type (eql 'sphere)) name pose
                        &key mass radius color)

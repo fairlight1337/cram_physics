@@ -126,8 +126,8 @@ property in their designator."
                      (desig:desig-prop-value perceived-object-designator
                                              'desig-props::name))
                    perceived-object-designators))
-  ;; Represents *all* objects present in the current bullet
-  ;; world, except for the ones explicitly being ignored.
+         ;; Represents *all* objects present in the current bullet
+         ;; world, except for the ones explicitly being ignored.
          (all-bullet-objects
           (cut:force-ll
            (cut:lazy-mapcar

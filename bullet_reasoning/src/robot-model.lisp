@@ -319,7 +319,7 @@ of the object should _not_ be updated."
                        (and link-attachment
                             (not (attachment-loose link-attachment)))))
                    attached-objects)))
-               (body-transform (cl-transforms:reference-transform (pose body)))
+               (body-transform (cl-transforms:reference-transform (cl-bullet:pose body)))
                (pose-transform (cl-transforms:reference-transform pose))
                (pose-delta (cl-transforms:transform*
                             (cl-transforms:transform*
@@ -341,7 +341,7 @@ current joint states"
           (pose-transform (cl-transforms:reference-transform pose)))
       (when body
         (update-attached-object-poses robot-object link pose)
-        (setf (pose body) (cl-transforms:transform-pose
+        (setf (cl-bullet:pose body) (cl-transforms:transform-pose
                            pose-transform
                            (cl-urdf:origin (cl-urdf:collision link)))))
       (dolist (to-joint (cl-urdf:to-joints link))
@@ -391,7 +391,7 @@ current joint states"
                            (cl-urdf:origin joint)))
                   (child-transform (cl-transforms:transform*
                                     (cl-transforms:reference-transform
-                                     (pose child-body))
+                                     (cl-bullet:pose child-body))
                                     (cl-transforms:transform-inv
                                      (cl-transforms:reference-transform
                                       (cl-urdf:origin (cl-urdf:collision child)))))))
@@ -474,7 +474,7 @@ current joint states"
              (cl-transforms:transform->pose
               (cl-transforms:transform*
                (cl-transforms:reference-transform current-pose)
-               (cl-transforms:reference-transform (pose (gethash (cl-urdf:name parent) links))))))
+               (cl-transforms:reference-transform (cl-bullet:pose (gethash (cl-urdf:name parent) links))))))
             ((and parent (cl-urdf:from-joint parent))
              ;; walk the tree up
              (let* ((parent-joint (cl-urdf:from-joint parent))
@@ -510,7 +510,7 @@ current joint states"
              (cl-transforms:transform->pose
               (cl-transforms:transform*
                (cl-transforms:reference-transform
-                (pose body))
+                (cl-bullet:pose body))
                (cl-transforms:transform-inv
                 (cl-transforms:reference-transform
                  (cl-urdf:origin (cl-urdf:collision link)))))))
