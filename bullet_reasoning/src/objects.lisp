@@ -137,17 +137,18 @@
     (loop for key being the hash-keys in rigid-bodies do
       (setf (gethash key rigid-bodies) nil))))
 
-(defmethod pose ((object object))
-  "Returns the pose of the object, i.e. the pose of the body named by
-  the slot `pose-reference-body'"
-  (let ((body (rigid-body object (slot-value object 'pose-reference-body))))
-    (when body
-      (cl-bullet:pose body))))
+(defgeneric pose (object)
+  (:documentation "Returns the pose of the object, i.e. the pose of the body named by the slot `pose-reference-body'")
+  (:method ((object object))
+    (let ((body (rigid-body object (slot-value object 'pose-reference-body))))
+      (when body
+        (cl-bullet:pose body)))))
 
-(defmethod (setf pose) (new-value (object object))
-  (let ((body (rigid-body object (slot-value object 'pose-reference-body))))
-    (when body
-      (setf (cl-bullet:pose body) new-value))))
+(defgeneric (setf pose) (new-value object)
+  (:method (new-value (object object))
+    (let ((body (rigid-body object (slot-value object 'pose-reference-body))))
+      (when body
+        (setf (cl-bullet:pose body) new-value)))))
 
 (defun set-object-pose (object new-pose)
   (setf (cl-bullet:pose object) (ensure-pose new-pose)))
