@@ -23,6 +23,7 @@
   <build_depend>bullet_reasoning</build_depend>
   <build_depend>cram_plan_knowledge</build_depend>
   <build_depend>cram_plan_library</build_depend>
+  <build_depend>cram_task_knowledge</build_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>cram_reasoning</run_depend>
@@ -33,7 +34,6 @@
   <run_depend>bullet_reasoning</run_depend>
   <run_depend>cram_plan_knowledge</run_depend>
   <run_depend>cram_plan_library</run_depend>
+  <run_depend>cram_task_knowledge</run_depend>
 
 </package>
-
-

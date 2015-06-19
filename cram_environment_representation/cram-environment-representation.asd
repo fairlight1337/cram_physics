@@ -37,7 +37,8 @@
                cram-roslisp-common
                bullet-reasoning
                cram-plan-knowledge
-               cram-plan-library)
+               cram-plan-library
+               cram-task-knowledge)
   :components
   ((:module "src"
     :components
