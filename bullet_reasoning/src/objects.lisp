@@ -151,7 +151,7 @@
         (setf (cl-bullet:pose body) new-value)))))
 
 (defun set-object-pose (object new-pose)
-  (setf (cl-bullet:pose object) (ensure-pose new-pose)))
+  (setf (pose object) (ensure-pose new-pose)))
 
 (defmethod draw ((context gl-context) (object object))
   (dolist (body (rigid-bodies object))
