@@ -165,7 +165,8 @@ property in their designator."
                ?w ,name ,pose)))))
     (plan-knowledge:on-event
      (make-instance 'plan-knowledge:object-updated-event
-                    :object-designator object))))
+                    :object-designator object
+                    :perception-source :generic))))
 
 (defmethod cram-task-knowledge:objects-perceived (object-template object-designators)
   ;; Make sure that the current pose and everything is in the
