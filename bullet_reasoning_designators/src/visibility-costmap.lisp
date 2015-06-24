@@ -234,7 +234,7 @@ square depth image of size `pixels' and the index of the depth image."
 (defun make-object-visibility-costmap
     (world object-name robot-name camera-minimal-height camera-maximal-height size resolution)
   (declare (type btr:bt-reasoning-world world)
-           (type symbol object-name robot-name)
+           (type symbol robot-name)
            (type number camera-maximal-height camera-minimal-height size resolution))
   (let* ((object (btr:object world object-name))
          (robot (btr:object world robot-name))
@@ -244,7 +244,7 @@ square depth image of size `pixels' and the index of the depth image."
                                        (objects world))))
     (visibility-costmap
      (btr:make-drawable-list :drawables objects-to-render)
-     (bt:pose object) camera-minimal-height camera-maximal-height
+     (pose object) camera-minimal-height camera-maximal-height
      size resolution)))
 
 (defun visibility-costmap (drawable pose camera-minimal-height camera-maximal-height size resolution)
