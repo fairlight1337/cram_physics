@@ -67,7 +67,7 @@
 instance of class OBJECT. `link' must be a string, the name of the
 link. If `loose' is non-NIL, it means that if the link moves, the pose
 of the object should _not_ be updated."
-  (object nil :type symbol)
+  (object nil)
   (link "" :type string)
   (loose nil :type (or nil t)))
 
