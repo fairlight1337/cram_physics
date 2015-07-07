@@ -142,7 +142,7 @@ of the object should _not_ be updated."
                             (list new-attachment)
                             (loop for body in (rigid-bodies obj)
                                   collecting (make-collision-information
-                                              :rigid-body-name (name body)
+                                              :rigid-body-name (cl-bullet:name body)
                                               :flags (collision-flags body))
                                   do (setf (collision-flags body) :cf-static-object))))
                      attached-objects)))))))
