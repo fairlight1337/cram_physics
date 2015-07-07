@@ -133,6 +133,8 @@ property in their designator."
           (name (desig:desig-prop-value object 'desig-props:name)))
       ;; TODO(winkler): Fix me
       (crs:prolog `(and (btr:bullet-world ?w)
+                        (btr:retract (btr:object ?w ,name))))
+      (crs:prolog `(and (btr:bullet-world ?w)
                         (btr:assert
                          (btr:object
                           ?w btr:box ,name ,pose
