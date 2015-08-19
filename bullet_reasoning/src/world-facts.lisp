@@ -110,7 +110,15 @@
     (bullet-world ?world)
     (lisp-fun object ?world ?name ?obj)
     (lisp-type ?obj object))
-
+  
+  (<- (%object ?world ?name ?obj)
+    (bound ?name)
+    (lisp-type ?name string)
+    (not (bound ?obj))
+    (bullet-world ?world)
+    (lisp-fun object ?world ?name ?obj)
+    (lisp-type ?obj object))
+  
   (<- (%object ?world ?name ?obj)
     (bound ?obj)
     (bullet-world ?world ?obj)

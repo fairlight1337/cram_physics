@@ -269,11 +269,11 @@ of the object should _not_ be updated."
           (perform-collision-detection world)
           (dolist (manifold (contact-manifolds world) contacts)
             (let ((obj (loop for obj in objects
-                             when (and (rigid-body obj (name (body-1 manifold)))
-                                       (rigid-body robot-object (name (body-2 manifold))))
+                             when (and (rigid-body obj (bt:name (body-1 manifold)))
+                                       (rigid-body robot-object (bt:name (body-2 manifold))))
                                do (return (cons obj (body-2 manifold)))
-                             when (and (rigid-body obj (name (body-2 manifold)))
-                                       (rigid-body robot-object (name (body-1 manifold))))
+                             when (and (rigid-body obj (bt:name (body-2 manifold)))
+                                       (rigid-body robot-object (bt:name (body-1 manifold))))
                                do (return (cons obj (body-1 manifold)))
                              finally (return nil))))
               (when obj
