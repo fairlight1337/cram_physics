@@ -111,6 +111,7 @@ just updated. Otherwise a new instance is created."))
 (defun remove-disappeared-objects (object-names)
   "Removes objects from the current bullet world. They are refered to by the `name' property specified in their designator."
   (dolist (object-name object-names)
+    (roslisp:ros-info (env rep) "Removing disappeared object `~a'" object-name)
     (crs:prolog
      `(and (btr:bullet-world ?w)
            (btr:retract
@@ -267,12 +268,18 @@ property in their designator."
               ;; bullet world, but are not reported as being seen by the
               ;; perception system.
               (should-be-visible-and-not-perceived
-                (cpl:mapcar-clean
-                 (lambda (should-be-visible-name)
-                   (when (not (find should-be-visible-name
-                                    perceived-object-names))
-                     should-be-visible-name))
-                 should-be-visible)))
+                (cond ((desig:desig-prop-value object-template 'desig-props:name)
+                       ;; If the object template has a name set, a
+                       ;; specific object is being looked for. Don't
+                       ;; remove other objects if that is the case, as
+                       ;; they can only be wrong object detections.
+                       nil)
+                      (t (cpl:mapcar-clean
+                          (lambda (should-be-visible-name)
+                            (when (not (find should-be-visible-name
+                                             perceived-object-names))
+                              should-be-visible-name))
+                          should-be-visible)))))
           ;; Remove objects from the current bullet world that *should* be
           ;; visible based on visibility reasoning, but aren't according
           ;; to the perception system.
